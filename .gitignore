@@ -1,0 +1,15 @@
+# Keep the existing NFL prediction experiments local for now.
+/*
+
+# Track only the public course entry point and Week 0.
+!/.gitignore
+!/README.md
+!/Week 0/
+!/Week 0/**
+
+# Do not publish rendered or temporary Quarto files yet.
+/Week 0/*.html
+/Week 0/*_files/
+/Week 0/*_cache/
+/Week 0/.quarto/
+
