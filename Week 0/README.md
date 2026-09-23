@@ -26,7 +26,7 @@ If R and RStudio are not installed:
 * Windows: [![Watch: Install R and RStudio on Windows](https://img.youtube.com/vi/rHZ9MGWxU5I/hqdefault.jpg)](https://www.youtube.com/watch?v=rHZ9MGWxU5I)
 * MacOS: [![Watch: Install R and RStudio on macOS](https://img.youtube.com/vi/AEebOXiMyyI/hqdefault.jpg)](https://www.youtube.com/watch?v=AEebOXiMyyI)
 2. Download the free version of [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
-3. [Download the Week 0 materials](https://github.com/cphills33/Learn-MLM-with-R-and-the-NFL/archive/refs/heads/main.zip)
+3. [Download the Week 0 materials]([Download all Week 0 materials](https://github.com/cphills33/Learn-MLM-with-R-and-the-NFL/releases/download/week-0-v1.0.0/Week_0_Materials.zip))
 4. Unzip the downloaded folder 
 5. Move the folder to a location on your computer where you do all the work for this course
 6. Inside the folder, find: Week_0_Worksheet.qmd
