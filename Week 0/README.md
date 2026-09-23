@@ -1,6 +1,7 @@
 # Week 0: Getting Started with R, RStudio, and Quarto
 
-This standalone module helps you install the required software and complete your first reproducible Quarto document. It is intended for people with no previous R experience.
+This module helps you install the required software and complete your first reproducible Quarto document. 
+It is intended for people with no previous R experience.
 
 ## What you will do
 
@@ -8,8 +9,8 @@ This standalone module helps you install the required software and complete your
 2. Install RStudio Desktop.
 3. Download and open the supplied Quarto document.
 4. Work with basic Markdown in the source editor.
-5. Run R code chunks and inspect their output.
-6. Install and load the tidyverse.
+5. Install and load the tidyverse.
+6. Run R code chunks and inspect their output.
 7. Create a small table and visualization.
 8. Restart R and render the complete document.
 
@@ -17,13 +18,16 @@ This standalone module helps you install the required software and complete your
 
 If R and RStudio are not installed:
 
+**Install R first, then RStudio**
+
+**They are different!**
+
 1. Download R from the [Comprehensive R Archive Network](https://cran.r-project.org/).
+* Windows: [![Watch: Install R and RStudio on Windows](https://img.youtube.com/vi/rHZ9MGWxU5I/hqdefault.jpg)](https://www.youtube.com/watch?v=rHZ9MGWxU5I)
+* MacOS: [![Watch: Install R and RStudio on macOS](https://img.youtube.com/vi/AEebOXiMyyI/hqdefault.jpg)](https://www.youtube.com/watch?v=AEebOXiMyyI)
 2. Download the free version of [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
-3. Install R first and RStudio second.
-
-Then download and open [`Week_0_Worksheet.qmd`](Week_0_Worksheet.qmd) in RStudio.
-
-## Completion
-
-The module is complete when `getting-started.qmd` renders successfully after restarting R. You do not need to submit or share the document.
-
+3. [Download the Week 0 materials](https://github.com/cphills33/Learn-MLM-with-R-and-the-NFL/archive/refs/heads/main.zip)
+4. Unzip the downloaded folder 
+5. Move the folder to a location on your computer where you do all the work for this course
+6. Inside the folder, find: Week_0_Worksheet.qmd
+7. Open Week_0_Worksheet.qmd in RStudio

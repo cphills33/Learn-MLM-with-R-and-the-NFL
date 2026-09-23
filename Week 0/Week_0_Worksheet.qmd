@@ -9,13 +9,17 @@ execute:
   echo: true
   warning: true
   message: false
+title-block-banner: true
+toc: true
 ---
 
 ## About this module
 
-This module introduces R, RStudio, Markdown, and Quarto. You do not need previous programming or statistics experience. Work through the sections in order and make changes directly in this file.
+This module introduces R, RStudio, Markdown, and Quarto.
 
-The module is complete when you can restart R and render this document successfully. You do not need to submit or share it.
+**Install R before installing RStudio.** 
+
+If either is missing, follow the instructions in the [Week 0 README](README.md) before continuing.
 
 ## Understand the tools
 
@@ -26,61 +30,168 @@ The module is complete when you can restart R and render this document successfu
 | R package | Adds functions and capabilities to R |
 | Quarto document | Combines Markdown text, code, output, and visualizations |
 
-Install R before installing RStudio. If either program is missing, follow the instructions in the [Week 0 README](README.md) before continuing.
+## Install and load a package
 
-## Work in the source editor
+R can do all kinds of amazing things but it can do even more amazing things if we install and load packages.
 
-This file is configured to use RStudio's source editor. You will see the Markdown syntax and R code that produce the finished document.
+Packages are sorta like scripts or code other people have written that contain 'functions' we can use in our code.
 
-A Quarto document contains two main kinds of content:
+For example, maybe someone else created a package with lots of functions useful to psychologists. 
+They might call that package: psych
 
-- **Markdown** communicates headings, paragraphs, lists, emphasis, and links.
-- **Code chunks** contain executable R code and produce output.
+It's important to realize that installing a package and loading a package are different things.
+
+**Installing** a package downloads it onto your computer.
+
+**Loading** a package means you can use the package in your code or script.
+
+For now, I want you to be able to recognize variables and functions in code.
+
+*Variables* are a way to define a variable is a name we use to store data.
+
+*Functions* are text followed by ().
+Sometimes there are arguments (information) inside the ().
+
+Truthfully, the difference between variables and functions is more complicated than that but that's a good place to start.
+
+This chunk has one line of code. It is a function because it is some text followed by ().
+
+Run it.
+```{r}
+#| eval: false
+
+install.packages("tidyverse")
+```
+That chunk installed a package called 'tidyverse' and might take a long time finish downloading.
+
+The function is 'install.packages()'
+
+It accepts the argument "tidyverse" inside ().
+
+So we can sometimes pass useful information to 'functions' as 'arguments' inside the ().
+
+But after all that, you still can't use it! 
+That's because you haven't loaded the package.
+
+This chunk loads the package using the 'library()' function.
+Run it.
+```{r}
+library(tidyverse)
+```
+
+## Parts of a Quarto document
+
+A Quarto document contains two kinds of content:
+
+- **Markdown**: this is plain text that you can stylize with headings, paragraphs, lists, italics, links, and images.
+- **Code chunks**: These are chunks of R code.
+
+## Set up the preview pane
+
+A great thing about Quarto documents is that they can be 'rendered' into html files (web pages) that can be opened with a web browser.
+
+Every time you press 'Render', a web page is created. 
+
+![Find the render button near the top of the window](render.png)
+
+
+
+
+By default, that webpage opens in a new window.
+But it's nice, in my opinion, to have the new webpage open in a pane within RStudio.
+
+Click on the gear beside the 'Render' button.
+Sometimes it can be hard to see.
+
+![Find the gear button](gear.png)
+
+Select 'Preview in Viewer Pane'.
+
+Now when you click 'Render', your webpage will appear in the viewer pane.
+
+![The viewer pane appears on the right side of the RStudio window by default](viewer.png)
 
 ## Practice Markdown
 
-Markdown headings begin with number signs:
+### Headings
 
-```markdown
-## Major section
+You can create headings in Markdown with '#'.
 
-### Smaller section
-```
+'#' is a level 1 heading.
 
-Other common syntax includes:
+'##' is a level 2 heading.
 
-```markdown
-This is **important** and this is *emphasized*.
+'###' is a level 3 heading.
 
-- First item
-- Second item
+You get the idea.
 
-The `library()` function loads an installed package.
+Press 'Render' above and see what the level 1 heading below looks like.
 
-Visit the [R Project website](https://www.r-project.org/).
-```
+# This is a level 1 heading.
 
-### Your turn
+Now, modify the heading. Replace the single '#' with '##'. And change the text to reflect that it is now a level 2 heading.
 
-Replace the text below with two or three things you hope to learn with R. Format them as a Markdown list.
+Press 'Render' again.
 
-- Replace this item.
-- Replace this item.
+Now try 3 '#'. 
+
+Then 4 '#'.
+
+What is the highest level heading?
+
+### Bold and italics
+
+You can **bold** text by encapsulating it with double-asterisks.
+
+You can *italicize* text by encapsulating it with single-asterisks.
+
+### Markdown cheatsheet
+
+You can learn (or remember in my case) all the different Markdown tricks by looking at the cheatsheet. 
+
+Find the cheat sheet in the Help menu: Help -> Cheat Sheets -> RMarkdown Cheat Sheet
+
 
 ## Run your first R code
 
-The gray area below is an R code chunk. Click inside it and use its green Run button. The result should appear beneath the chunk.
+Below is a chunk of R code. 
+
+It begins with 3 backticks (these are not apostrophes. They are usually located above the tab key on your keyboard).
+
+Next is 'r' inside a curly brace. 
+
+Finally, it ends with 3 backticks.
+
+Press the green play button (green triangle) to run the code. 
 
 ```{r}
 2 + 2
 ```
 
-The opening line tells Quarto that the chunk contains R code. The three backticks at the end close the chunk. Regular explanatory text belongs outside code chunks.
+The result should appear below the chunk: [1] 4
 
-## Create and inspect objects
+Because 2 + 2 = 4.
 
-The assignment operator `<-` stores a value under a name.
+If you want to make a new chunk of r code, click the green c above.
 
+![Click that c inside the green square](chunk.png)
+
+## Create some variables
+
+The assignment operator `<-` 'assigns' a value to a variable.
+
+For now, a variable is a name we use to store a value.
+(Whereas text outside chunks is just text)
+
+In the below chunk, a variable called 'course_name' is 'assigned' the value of 'Getting Started with R'.
+
+Then a variable called, 'number_of_sessions' is 'assigned the value of '10'.
+
+Next, the variable called 'course_name' is printed to the screen.
+
+Finally, the variable called 'number_of_sessions' is printed to the screen.
+
+Run the chunk:
 ```{r}
 course_name <- "Getting Started with R"
 number_of_sessions <- 10
@@ -89,12 +200,24 @@ course_name
 number_of_sessions
 ```
 
-Change `course_name` and `number_of_sessions`, then run the chunk again. Choose clear object names that describe what they contain.
+You should see two rows of output--the values assigned to course_name and number_of_sessions.
 
-## Perform a calculation
+1. Change the values assigned to each variable then run the chunk again.
+2. Change the names of the variables. What happens?
+3. Change the names back before moving on.
 
-Objects can be used in later calculations.
 
+
+## Use a variable in a calculation
+
+Before you run this chunk, read it line by line.
+
+What do you think each line does?
+
+Are all the variables used in this chunk, defined in this chunk? 
+Or are some of them defined in the previous chunk?
+
+Now run the chunk.
 ```{r}
 minutes_per_session <- 45
 
@@ -103,45 +226,22 @@ total_minutes <- number_of_sessions * minutes_per_session
 total_minutes
 ```
 
-Change `minutes_per_session` and observe how the result changes.
+Were you right?
 
-## Work with text
+Change the values assigned to the variables. What do you think will happen now?
 
-Replace the placeholder with your preferred name, then run the chunk.
 
-```{r}
-first_name <- "Replace this text"
+## Create some data
 
-message("Hello, ", first_name, "! R is working.")
-```
+There are lots of ways to represent data in R.
 
-## Install and load a package
+Vectors, tables, matrices, data frames, and plenty more.
 
-Installing and loading are different operations:
+We are going to use something called a tibble. 
 
-- `install.packages()` puts a package on the computer. You generally do this once.
-- `library()` makes an installed package available in the current R session. You generally do this after starting a new session.
+A tibble is a rectangular dataset with rows and columns---in other words, a tibble looks like an excel spreadsheet or an SPSS document.
 
-The installation chunk is not evaluated when the full document renders. If the tidyverse is not installed, place the cursor inside the chunk and run it manually once.
-
-```{r}
-#| eval: false
-
-install.packages("tidyverse")
-```
-
-Now load the package:
-
-```{r}
-library(tidyverse)
-```
-
-If R reports `there is no package called 'tidyverse'`, return to the installation chunk and run it.
-
-## Create a small dataset
-
-A tibble is a rectangular dataset with rows and columns. Edit the activities and minutes to make this example personally meaningful.
-
+Read this chunk line by line. What happens? If you're not sure, run the chunk.
 ```{r}
 practice_data <- tibble(
   activity = c("Reading", "Exercise", "Music"),
@@ -151,12 +251,15 @@ practice_data <- tibble(
 practice_data
 ```
 
-After editing, make sure that the number of activities still matches the number of time values.
+Now edit the activities and minutes variables to reflect your life on a weekly basis.
 
-## Create a visualization
+Remember, you aren't restricted to just three rows!
 
-The following code uses ggplot2, which was loaded as part of the tidyverse. Run the chunk and inspect the visualization that appears below it.
+## Visualize your data!
 
+The following code uses the function 'ggplot()' to create a graph.
+
+We'll learn more about ggplot later. For now, run the chunk!
 ```{r}
 ggplot(
   practice_data,
@@ -171,76 +274,16 @@ ggplot(
   theme_minimal()
 ```
 
-Change the title so that it accurately describes your edited data.
+Can you change the color?
 
-### Describe the result
+Can you change the title?
 
-Replace this paragraph with one or two sentences describing something visible in your table or visualization.
+Can you change the type of graph? (hint: try googling types of ggplot graphs)
 
-## Inspect the computing environment
+## Finishing up
 
-The following commands report the R version and operating system. This information can be useful when troubleshooting or reproducing an analysis.
+If you got this far, AWESOME!
 
-```{r}
-R.version.string
-Sys.info()[["sysname"]]
-```
+Your last task is to save this document, close RStudio, open RStudio back up, and then press Render.
 
-You do not need to memorize or interpret all the technical details returned by `sessionInfo()`.
-
-```{r}
-sessionInfo()
-```
-
-## Render the complete document
-
-Complete these steps:
-
-1. Save this `.qmd` file.
-2. In RStudio, restart R using **Session > Restart R**.
-3. Select **Render**.
-4. Confirm that the resulting HTML document contains your text, calculations, table, and visualization.
-
-Rendering after a restart tests whether the document contains everything needed to reproduce its own output.
-
-## Troubleshooting
-
-### RStudio cannot find R
-
-Confirm that R was installed before RStudio. Close RStudio, reinstall R from the official R website, and reopen RStudio.
-
-### A package cannot be found
-
-Run the installation chunk manually and then rerun `library(tidyverse)`.
-
-### Code appears as text
-
-Confirm that the code is between an opening line containing three backticks followed by `{r}` and a closing line containing three backticks.
-
-### Markdown produces an error in R
-
-Markdown text may have been placed inside an R code chunk. Move prose outside the chunk boundaries.
-
-### The document works interactively but will not render
-
-Restart R and run the document from the beginning. Look for an object that was created in the console but not created inside the document.
-
-### Output appears in the console instead of below a chunk
-
-Make sure you opened the `.qmd` file in RStudio and are running code from a code chunk. RStudio preferences and versions can affect where interactive output appears, but the rendered HTML should still contain the output.
-
-## Completion checklist
-
-- [ ] R is installed.
-- [ ] RStudio opens successfully.
-- [ ] I worked in the source editor.
-- [ ] I edited a Markdown heading or list.
-- [ ] I distinguished Markdown from R code chunks.
-- [ ] I ran code and inspected its output.
-- [ ] I installed and loaded the tidyverse.
-- [ ] I created a small tibble.
-- [ ] I created a ggplot visualization.
-- [ ] I saved the `.qmd` file.
-- [ ] I restarted R.
-- [ ] I rendered the complete document successfully.
-
+The point is to notice that we can save our analyses and run them again later.
