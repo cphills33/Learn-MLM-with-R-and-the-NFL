@@ -1,10 +1,12 @@
 /*
 
-# Track only the public course entry point and Week 0.
+# Track the public course entry point and course modules.
 !/.gitignore
 !/README.md
 !/Week 0/
 !/Week 0/**
+!/Week 1/
+!/Week 1/**
 
 # Ignore system files and packaged downloads everywhere.
 .DS_Store
@@ -15,4 +17,13 @@
 /Week 0/*_files/
 /Week 0/*_cache/
 /Week 0/.quarto/
+/Week 1/*.html
+/Week 1/*_files/
+/Week 1/*_cache/
+/Week 1/.quarto/
+/Week 1/data/PROVENANCE.md
+/Week 1/PLAN.md
+/Week 1/build_data.R
+/Week 1/check_wins.R
 
+/.quarto/

@@ -1,0 +1,176 @@
+---
+title: "Week 1: Import data, manipulate it, then visualize it"
+format:
+  html:
+    embed-resources: true
+editor: source
+execute:
+  echo: true
+  warning: true
+  message: false
+title-block-banner: true
+toc: true
+---
+
+Which teams won the most games in the 2025 NFL regular season?
+
+**Data credit:** The CSV uses game and schedule data maintained by Lee Sharpe and retrieved with [`nflreadr::load_schedules(2025)`](https://nflreadr.nflverse.com/reference/load_schedules.html).
+
+## Load Packages
+
+Only run this chunk if you haven't installed tidyverse on your computer before
+```{r}
+#| eval: false
+install.packages("tidyverse")
+```
+
+But always run this chunk
+```{r}
+library(tidyverse)
+```
+
+## Import data
+
+Use the read_csv function to import the data located "data/games_2025.csv".
+
+Store that data in a variable called 'games'
+
+Print the variable 'games' to the screen
+```{r}
+games <- read_csv("data/games_2025.csv", show_col_types = FALSE)
+
+games
+```
+Open the help panel and search for read_csv.
+What other types of data can be imported?
+
+In this dataset, each row is a single game from the 2025 season.
+
+Which columns will we use to count how many wins each team had?
+
+Here are some useful functions to help us inspect data.
+
+How many rows are in the dataset?
+```{r}
+nrow(games)
+```
+What are the names of the variables in the dataset?
+```{r}
+colnames(games)
+```
+How many games were played this season?
+```{r}
+count(games)
+```
+
+How many games were played in Jacksonville?
+```{r}
+count(games, home_team == "JAX")
+```
+Wait... weren't some games played in London?
+
+Something to look into later.
+Apparently home team and location of game are different.
+
+## Tidy data
+
+To start, here is our dataset
+```{r}
+games
+```
+
+What does the select function do?
+
+```{r}
+games |>
+  select(week, away_team, away_score, home_team, home_score) |>
+  slice_head(n = 6)
+```
+What did the slice_head function do?
+
+If you aren't sure, open the help panel and search for slice.
+
+Read the above code as:
+1. start with games
+2. THEN SELECT the following variables: week, away_team, away_score, home_team, home_score
+3. THEN SLICE the first 6 rows (keep only the first six rows)
+
+
+What does the count function do?
+```{r}
+games |>
+  count(week)
+```
+What does the mutate function do?
+```{r}
+games |>
+  mutate(score_difference = home_score - away_score) |>
+  select(week, away_team, home_team, score_difference) |>
+  slice_head(n = 6)
+```
+
+Read the code above as:
+1. start with games
+2. THEN MUTATE (in this case, create) a new variable called 'score_difference' by subtracting away_score from home_score
+3. THEN SELECT the following variables (week, away_team, home_team, score_difference)
+4. THEN SLICE the first 6 rows
+
+## Count team wins
+
+The data have one row per game.
+Your chart needs one row per team.
+
+So what will you do?
+
+There are a million strategies you could use. I've written one below.
+
+1. start with games
+2. THEN MUTATE a new variable called 'score_difference' by subtracting away_score from home_score
+3. THEN MUTATE a new variable called 'winner' by recording home_team if score_difference > 0, otherwise recording away_team
+    * mutate(newvariable = ifelse(score_difference>0, home_team, away_team))
+    * You can remember how to use the ifelse function with the acronym WTF
+    * WHAT: score_difference>0
+    * TRUE: if true, record the home_team as the winner
+    * FALSE: if false, record the away_team as the winner
+4. THEN COUNT the winners
+5. THEN store the output in a variable called num_team_wins
+
+
+Problem with this algorithm: What if there is a tie?
+
+Advanced mode: Fix the algorithm to handle ties.
+
+
+```{r}
+#| eval: false
+
+games |>
+  mutate(score_difference = home_score - away_score) |>
+```
+## Make the chart
+
+```{r}
+#| eval: false
+#| fig-width: 10
+#| fig-height: 10
+
+num_team_wins |>
+  ggplot(aes(x = wins, y = team)) +
+  geom_col()+
+  labs(
+    title = "",
+    x = "Regular-season wins",
+    y = NULL,
+    caption = "hmm...."
+  ) +
+  theme_ +
+  theme()
+```
+
+Can you change the colors?
+
+Can you change the fonts?
+
+Can you change the size of the fonts?
+
+Can you flip the chart?
