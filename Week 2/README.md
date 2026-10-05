@@ -1,5 +1,31 @@
 # Week 2: Manipulate data with dplyr
 
+## Download and set up Week 2
+
+1. Download `Week_2_Materials.zip` from the [course GitHub releases](https://github.com/cphills33/Learn-MLM-with-R-and-the-NFL/releases). Unzip it and locate the `Week 2` folder inside.
+2. Move the `Week 2` folder into the RStudio Project you created in Week 1, beside its `.Rproj` file.
+3. Open that `.Rproj` file, then open `Week 2/Week_2_Worksheet.qmd`.
+4. Work through the worksheet. Restart R and click **Render** to check that the complete analysis runs.
+
+Your files should look like this:
+
+```text
+NFL-Course/
+├── NFL-Course.Rproj
+├── Week 1/
+└── Week 2/
+    ├── README.md
+    ├── Week_2_Worksheet.qmd
+    ├── helper-functions.R
+    └── data/
+        ├── games_2025.csv
+        └── PROVENANCE.md
+```
+
+If you need to create a project, follow the [Week 1 setup instructions](../Week%201/README.md).
+
+**Data credit:** This is the same 2025 regular-season CSV used in Week 1, retrieved through `nflreadr`. See [data provenance](data/PROVENANCE.md) for the source and preparation details.
+
 ## Learning goals
 
 - Use `select()`, `filter()`, `arrange()`, and `mutate()`.
