@@ -27,3 +27,14 @@
 /Week 1/check_wins.R
 
 /.quarto/
+
+# Publish only the ready Week 2 student materials.
+!/Week 2/
+/Week 2/*
+!/Week 2/README.md
+!/Week 2/Week_2_Worksheet.qmd
+!/Week 2/helper-functions.R
+!/Week 2/data/
+/Week 2/data/*
+!/Week 2/data/games_2025.csv
+!/Week 2/data/PROVENANCE.md

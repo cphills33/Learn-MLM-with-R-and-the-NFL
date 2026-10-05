@@ -1,0 +1,177 @@
+---
+title: "Week 2: Manipulate data with dplyr"
+format:
+  html:
+    toc: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+Last week we learned which teams won the most.
+
+This week we'll find out which teams won (or lost) by the most.
+
+And, along the way, learn a few more dplyr tricks and tips.
+
+## Load packages
+
+```{r}
+library(tidyverse) # You should already have installed this package in previous weeks
+source("helper-functions.R") # This is a place where you will paste useful functions to reuse
+```
+
+## Import data
+
+```{r}
+games <- read_csv("data/games_2025.csv", show_col_types = FALSE)
+glimpse(games)
+```
+
+## Tidy data
+
+1. START with games
+2. THEN SELECT the following columns: season, home_team, away_team, home_score, and away_score
+3. STORE (->) the new dataset in 'season_games'
+
+```{r}
+games |>
+  select(season, home_team, away_team, home_score, away_score) -> season_games
+```
+
+1. START with season_games
+2. THEN FILTER out any rows (games) that have an NA instead of value
+3. STORE the new dataset in 'completed_games'
+
+```{r}
+season_games |>
+  filter_out(is.na(home_score) | is.na(away_score)) -> completed_games
+```
+
+1. START with completed_games
+2. THEN RENAME the following columns: home_team -> team, away_team -> opponent, home_score -> points_scored, away_score -> points_allowed
+3. THEN MUTATE (create) a new variable called 'venue' with the value 'Home' in every row
+4. STORE the new dataset in 'home_team_games'
+
+```{r}
+completed_games |>
+  rename(team = home_team,
+         opponent = away_team,
+         points_scored = home_score,
+         points_allowed = away_score) |>
+  mutate(venue = "Home") -> home_team_games
+```
+
+Now do the same for away_team_games
+
+1. START with completed_games
+2.
+3.
+4.
+
+```{r}
+completed_games |>
+  rename(team = away_team,
+         opponent = home_team,
+         points_scored = away_score,
+         points_allowed = home_score)|>
+  mutate(venue = "Away") -> away_team_games
+```
+
+1. START with home_team_games
+2. THEN BIND_ROWS to append the away_team_games to bottom of the home_team_games (add new rows at the bottom of home_team_games)
+3. MUTATE three new variables (columns)
+    * scoring margin = points_scored - points_allowed
+    * won = scoring_margin > 0
+    * tied = scoring_margin == 0
+4. STORE the new dataset in 'team_games'
+
+```{r}
+home_team_games |>
+  bind_rows(away_team_games) |>
+  mutate(scoring_margin = points_scored - points_allowed,
+         won = scoring_margin > 0,
+         tied = scoring_margin == 0) -> team_games
+```
+
+## Summarize team performance
+
+1. START with team_games
+2. THEN GROUP_BY team (imagine splitting the dataset into groups such that each group contains all the rows for 1 specific team. In this case, each group will have 17 rows: one for each game the team played)
+3. THEN SUMMARIZE for each group (team, in this case), total games played, total wins, total ties, average points scored, average points allowed, and average scoring margin.
+4. STORE the new dataset in team_summary
+
+```{r}
+team_games |>
+  group_by(team) |>
+  summarise(games_played = n(),
+            wins = sum(won),
+            ties = sum(tied),
+            average_points_scored = mean(points_scored),
+            average_points_allowed = mean(points_allowed),
+            average_scoring_margin = mean(scoring_margin)) -> team_summary
+```
+
+1. START with team_summary
+2. THEN ARRANGE (sort) the data by wins
+3. THEN SLICE_HEAD the data so we only see the top (errrr.... bottom) 5
+
+```{r}
+team_summary |>
+  arrange(wins, team) |>
+  slice_head(n = 5)
+```
+1. START with team_summary
+2. THEN ARRANGE (sort) the data by wins IN DESCENDING ORDER (top to bottom)
+3. THEN SLICE_HEAD the data so we only see the top 5
+
+```{r}
+team_summary |>
+  arrange(desc(wins), team) |>
+  slice_head(n = 5)
+```
+
+1. START with team_summary
+2. THEN ARRANGE (sort) the data by average points scored IN DESCENDING ORDER (top to bottom)
+3. THEN SLICE_HEAD the data so we only see the top 6
+```{r}
+
+```
+
+1. START with team_summary
+2. THEN ARRANGE (sort) the data by average scoring margin IN DESCENDING ORDER (top to bottom)
+3. THEN SLICE_HEAD the data so we only see the top 7
+
+```{r}
+
+```
+
+## Create the weekly visual
+
+1. START with team_summary
+2. THEN pass it to ggplot
+3. Set the x-axis to average scoring margin (try changing this to another column in team_summary)
+4. Reorder (sort) the y-axis by team with the highest scoring margin
+5. Add a vline to the plot (try changing the color or linetype)
+6. Add points to the plot (try changing color, size, shape)
+7. Add titles (labels) to the plot
+8. Add a theme to the plot!
+9. Keep customizing the theme
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+team_summary |>
+  ggplot(aes(x = average_scoring_margin, y = reorder(team, average_scoring_margin))) +
+  geom_vline(xintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_point(size = 2.8, color = "#176B87") +
+  labs(title = "Average scoring margin by NFL team",
+       subtitle = "2025 regular season",
+       x = "Average scoring margin (points per game)",
+       y = NULL,
+       caption = "Data: nflverse/nfldata via nflreadr; 2025 regular season") +
+  theme_nfl_lab()
+```
