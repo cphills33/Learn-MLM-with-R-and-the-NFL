@@ -2,6 +2,8 @@
 
 ## Set up Week 3
 
+Download [Week_3_Materials.zip](https://github.com/cphills33/Learn-MLM-with-R-and-the-NFL/releases/download/week-3-v1.0.0/Week_3_Materials.zip), unzip it, and locate the `Week 3` folder inside.
+
 1. Put the `Week 3` folder inside your RStudio Project, beside `Week 1` and `Week 2`.
 2. Open your `.Rproj` file, then open `Week 3/Week_3_Worksheet.qmd`.
 3. Work through the worksheet and create your own revised plot.
