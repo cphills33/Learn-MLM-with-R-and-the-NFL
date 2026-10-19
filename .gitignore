@@ -38,3 +38,15 @@
 /Week 2/data/*
 !/Week 2/data/games_2025.csv
 !/Week 2/data/PROVENANCE.md
+
+# Week 3 student materials; keep rendered HTML previews local.
+!/Week 3/
+/Week 3/*
+!/Week 3/README.md
+!/Week 3/Week_3_Worksheet.qmd
+!/Week 3/helper-functions.R
+!/Week 3/week-03-my-plot.png
+!/Week 3/data/
+/Week 3/data/*
+!/Week 3/data/games_2025.csv
+!/Week 3/data/PROVENANCE.md

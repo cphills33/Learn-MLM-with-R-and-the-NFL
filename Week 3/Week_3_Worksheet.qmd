@@ -1,0 +1,341 @@
+---
+title: "Week 3: Build better plots with ggplot2"
+format:
+  html:
+    toc: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+Last week we compared teams by their average scoring margin.
+
+This week we'll try some new ways of visualizing that data.
+
+## Load packages
+
+```{r}
+library(tidyverse) # You should already have installed this package in previous weeks
+source("helper-functions.R") # This is a place where you will paste useful functions to reuse
+```
+
+## Import data
+
+```{r}
+games <- read_csv("data/games_2025.csv", show_col_types = FALSE)
+```
+
+## Recreate the team summary
+
+A little review from last week!
+
+Below is the code. You should write the verbal description of the code here:
+
+1. START with games
+2. THEN
+
+```{r}
+games |>
+  select(season, home_team, away_team, home_score, away_score) |>
+  filter(season == 2025, !is.na(home_score), !is.na(away_score)) -> completed_games
+```
+
+1. START with completed_games
+2. THEN
+
+```{r}
+completed_games |>
+  select(season, team = home_team, opponent = away_team,
+         points_scored = home_score, points_allowed = away_score) |>
+  mutate(venue = "Home") -> home_team_games
+```
+
+
+1. START with completed_games
+2. THEN
+
+```{r}
+completed_games |>
+  select(season, team = away_team, opponent = home_team,
+         points_scored = away_score, points_allowed = home_score) |>
+  mutate(venue = "Away") -> away_team_games
+```
+
+1. START with home_team_games
+2. THEN
+
+```{r}
+home_team_games |>
+  bind_rows(away_team_games) |>
+  mutate(scoring_margin = points_scored - points_allowed) -> team_games
+```
+
+1. START with team_games
+2. THEN
+
+```{r}
+team_games |>
+  group_by(team) |>
+  summarise(games_played = n(),
+            average_scoring_margin = mean(scoring_margin),
+            .groups = "drop") -> team_summary
+```
+
+## Start with a basic plot
+
+1. START with team_summary
+2. THEN pass the data to GGPLOT WITH team on the x-axis and average_scoring margin on y-axis
+3. ADD GEOM_POINT to show all the dots WITH color = RED and size = 1
+4. ADD LABS to show labels WITH title = "NFL", x = "Team" and y = "Value"
+5. ADD THEME_GRAY
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+
+team_summary |>
+  ggplot(aes(x = team, y = average_scoring_margin)) +
+  geom_point(color = "red", size = 1) +
+  labs(title = "NFL", x = "Team", y = "Value") +
+  theme_gray()
+```
+
+Before changing the figure:
+
+- How could we make it easier to find the team with the highest scoring margin?
+- What other changes could make this graph clearer?
+
+## Now let's build the plot one layer at a time
+
+This is how you will build all your plots in R: One layer at a time.
+
+Basically, add a layer, see how it looks, then make adjustments or add another layer
+
+### 1. Create the axes but don't show any data
+
+1. START with team_summary.
+2. THEN pass it to ggplot().
+3. Use aes() to put average scoring margin on the x-axis and team on the y-axis.
+
+```{r}
+team_summary |>
+  ggplot(aes(x = average_scoring_margin, y = team))
+```
+
+### 2. Add a geometry layer
+
+This is usually some sort of way of showing the data. Bar chart, dots, violin plots, box plots, etc
+
+Complete this:
+
+1. START with team_summary
+2. THEN
+
+```{r}
+team_summary |>
+  ggplot(aes(x = average_scoring_margin, y = team)) +
+  geom_point(size = 2.8, color = "#176B87")
+```
+
+Run this chunk a few times.
+
+Try changing `size` and `shape`.
+
+If you're not sure how to change the shape, try searching in the help tab or try searching stackoverflow.
+
+Obviously, I've already chosen the ideal color so no need to experiment there.
+
+### 3. Order the teams
+
+Complete this:
+
+1. START with team_summary
+2. THEN
+
+```{r}
+team_summary |>
+  ggplot(aes(x = average_scoring_margin,
+             y = reorder(team, average_scoring_margin))) +
+  geom_point(size = 2.8, color = "#176B87")
+```
+
+`reorder()` changes the order of the team labels using their average margins.
+The highest value appears at the top.
+
+### 4. Add a vertical line and a theme
+
+Complete this:
+
+1. START with team_summary
+2. THEN
+
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+team_summary |>
+  ggplot(aes(x = average_scoring_margin,
+             y = reorder(team, average_scoring_margin))) +
+  geom_vline(xintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_point(size = 2.8, color = "#176B87") +
+  labs(title = "Average scoring margin by NFL team",
+       subtitle = "2025 regular season; each team played 17 games",
+       x = "Average scoring margin (points per game)",
+       y = NULL,
+       caption = "Data: nflverse/nfldata via nflreadr; 2025 regular season") +
+  theme_nfl_lab()
+```
+
+Keep experimenting with different themes until you find one you like!
+
+## Map a color to a specific team
+
+1. START with team_summary.
+2. MUTATE a new variable indicating whether each row is your selected team.
+3. STORE the result in highlighted_teams.
+
+Replace "JAX" with another team abbreviation from the data if you prefer.
+
+```{r}
+selected_team <- "JAX"
+
+team_summary |>
+  mutate(highlight = if_else(team == selected_team,
+                            "Selected team", "Other teams")) -> highlighted_teams
+
+highlighted_teams
+```
+Click through the above data until you can confirm that JAX (or your team) is the 'selected team'
+
+1. START with highlighted_teams
+2. THEN
+
+```{r}
+highlighted_teams |>
+  ggplot(aes(x = average_scoring_margin,
+             y = reorder(team, average_scoring_margin))) +
+  geom_vline(xintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_point(aes(color = highlight, shape = highlight), size = 2.8) +
+  scale_color_manual(values = c("Other teams" = "grey60",
+                                "Selected team" = "#176B87")) +
+  scale_shape_manual(values = c("Other teams" = 16, "Selected team" = 17)) +
+  labs(title = paste("Where does", selected_team, "fall in the comparison?"),
+       subtitle = "2025 regular season",
+       x = "Average scoring margin (points per game)", y = NULL,
+       color = NULL, shape = NULL,
+       caption = "Data: nflverse/nfldata via nflreadr; 2025 regular season") +
+  theme_nfl_lab() -> highlight_plot
+```
+
+### Quick coloring tip
+
+When you put 'color' inside 'aes', you decide which variable determines the colors.
+
+But when you put color on its own (or outside aes) then every 'point' gets the same color.
+
+Notice that 'scale_color_manual' is where we set the actual colors that appear in the graph.
+
+We have a variable called 'highlight' with two values: 'Other teams' and 'Selected team'
+
+We use scale_color_manual to tell ggplot which color each value of 'highlight' should get
+
+So, we could add more values to 'highlight' and add more color decisions to scale_color_manual
+
+
+### Also, notice we can save a ggplot into a variable and then use it in future code
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+highlight_plot
+```
+
+Note that changing the shape means that the graph doesn't depend on color alone which means it is more color-blind friendly
+
+## Your turn:
+
+Make your best plot!
+
+* can you make the labels more readable?
+* Can you highlight two teams?
+* Can you highlight all the AFC South teams?
+* Is 'selected team' really the best label? What about other teams? Maybe we don't need a legend. Or maybe we do?
+* Can you make the vertical line thicker?
+
+
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+```
+
+## Extra Credit
+
+Try geom_col instead of geom_point
+
+```{r}
+
+```
+
+## Optional: compare home and away performance
+
+Now change the question: does each team's average margin look different at home and away?
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+
+team_games |>
+  group_by(team, venue) |>
+  summarise(average_scoring_margin = mean(scoring_margin),
+            games_played = n(), .groups = "drop") -> venue_summary
+
+# Keep the same team order in both panels, based on the full-season summary.
+team_summary |>
+  arrange(average_scoring_margin, team) |>
+  pull(team) -> team_order
+
+venue_summary |>
+  mutate(team = factor(team, levels = team_order)) |>
+  ggplot(aes(x = average_scoring_margin, y = team)) +
+  geom_vline(xintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_point(color = "#176B87", size = 2.4) +
+  facet_wrap(~venue) +
+  labs(title = "Compare scoring margins at home and away",
+       subtitle = "2025 regular season; panels use the same axes and team order",
+       x = "Average scoring margin (points per game)", y = NULL,
+       caption = "Data: nflverse/nfldata via nflreadr; 2025 regular season") +
+  theme_nfl_lab()
+```
+
+Check `venue_summary` for games played. Teams played different numbers of home and away games. Opponents also differed, so these panels alone do not show that venue caused a difference.
+
+## Save your figure to your computer
+
+After creating `my_plot`, enable this chunk by changing `eval: false` to `eval: true`.
+Save your plot into a variable called 'my_plot' and then run.
+
+```{r}
+#| eval: false
+ggsave("week-03-my-plot.png", plot = my_plot,
+       width = 9, height = 8, units = "in", dpi = 300, bg = "white")
+```
+
+## Prepare for Friday
+
+- Show your original and revised figures. What became easier to see?
+- Identify the data, aesthetic mappings, and geometry in your code.
+- Explain one design choice and one limitation.
+- Restart R and Render. Did the document run without relying on old objects?
+
+## Optional graduate GitHub route
+
+Add your saved figure to your personal repository's README using a relative path:
+
+```markdown
+![Describe your figure and its main pattern here.](Week%203/week-03-my-plot.png)
+```
