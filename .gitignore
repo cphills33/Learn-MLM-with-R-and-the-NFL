@@ -50,3 +50,15 @@
 /Week 3/data/*
 !/Week 3/data/games_2025.csv
 !/Week 3/data/PROVENANCE.md
+
+# Week 4 student materials; keep rendered previews local.
+!/Week 4/
+/Week 4/*
+!/Week 4/README.md
+!/Week 4/Week_4_Worksheet.qmd
+!/Week 4/helper-functions.R
+!/Week 4/week-04-my-plot.png
+!/Week 4/data/
+/Week 4/data/*
+!/Week 4/data/games_2025.csv
+!/Week 4/data/PROVENANCE.md

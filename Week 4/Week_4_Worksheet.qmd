@@ -1,0 +1,347 @@
+---
+title: "Week 4: Wide, Long, and Join"
+format:
+  html:
+    toc: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+Last week we practiced making team comparisons easier to see.
+
+This week we'll separate scoring margin into points scored and points allowed.
+
+Which teams look strong on both?
+
+## Load packages and import data
+
+```{r}
+library(tidyverse)
+source("helper-functions.R")
+
+games <- read_csv("data/games_2025.csv", show_col_types = FALSE)
+glimpse(games)
+```
+
+This is the same frozen 2025 regular-season file used in previous weeks. One row represents one game. See `data/PROVENANCE.md` for its source and preparation.
+
+## Check before calculating
+
+1. START with games.
+2. SUMMARIZE how many rows, distinct game IDs, and missing scores we have.
+
+```{r}
+games |>
+  summarise(rows = n(),
+            distinct_games = n_distinct(game_id),
+            missing_home_scores = sum(is.na(home_score)),
+            missing_away_scores = sum(is.na(away_score)))
+
+games |>
+  count(game_id) |>
+  filter(n > 1)
+```
+
+The second output should have zero rows. What would a row in that output tell you?
+
+```{r}
+games |>
+  filter(season == 2025) -> season_games
+
+# A zero score is valid. A missing score cannot be used in this comparison.
+season_games |>
+  filter(!is.na(home_score), !is.na(away_score)) -> completed_games
+
+tibble(input_games = nrow(season_games),
+       included_games = nrow(completed_games),
+       excluded_games = nrow(season_games) - nrow(completed_games))
+
+stopifnot(!anyDuplicated(completed_games$game_id),
+          nrow(completed_games) > 0)
+```
+
+**What did you find?** Record the missing-score counts and exclusions. Do not replace missing scores with zero.
+
+## Review: give each team its own row
+
+Write the verbal description of these pipelines. Include what one row represents after combining the home and away views.
+
+1. START with completed_games.
+2. THEN
+
+```{r}
+completed_games |>
+  select(game_id, season, team = home_team,
+         points_scored = home_score, points_allowed = away_score) |>
+  mutate(venue = "Home") -> home_team_games
+
+completed_games |>
+  select(game_id, season, team = away_team,
+         points_scored = away_score, points_allowed = home_score) |>
+  mutate(venue = "Away") -> away_team_games
+
+home_team_games |>
+  bind_rows(away_team_games) |>
+  mutate(scoring_margin = points_scored - points_allowed,
+         won = scoring_margin > 0,
+         tied = scoring_margin == 0) -> team_games
+
+team_games
+
+stopifnot(nrow(team_games) == 2 * nrow(completed_games),
+          !anyNA(team_games$team))
+```
+
+Click through `team_games`. Find both rows for one game and check how points scored and allowed switch roles.
+
+## Summarize scoring
+
+Complete the description:
+
+1. START with team_games.
+2. THEN
+
+```{r}
+team_games |>
+  group_by(season, team) |>
+  summarise(average_points_scored = mean(points_scored),
+            average_points_allowed = mean(points_allowed),
+            .groups = "drop") -> scoring_summary
+
+scoring_summary
+```
+
+Click through the output and find your team. Which number would you want to be larger? Which would you want to be smaller?
+
+## Make the summary longer
+
+Right now, the two scoring measures live in separate columns. `pivot_longer()` puts their names in one column and their values in another.
+
+1. START with scoring_summary.
+2. PIVOT_LONGER the two average-points columns.
+3. Put the column names in `measure` and the numbers in `points_per_game`.
+4. STORE the result in scoring_long.
+
+```{r}
+scoring_summary |>
+  pivot_longer(cols = c(average_points_scored, average_points_allowed),
+               names_to = "measure",
+               values_to = "points_per_game") -> scoring_long
+
+scoring_long
+
+tibble(before = nrow(scoring_summary), after = nrow(scoring_long))
+```
+
+Find your team again. Why does it now have two rows? Did reshaping calculate new averages?
+
+**One row in `scoring_long` represents:**
+
+## Make it wider again
+
+`pivot_wider()` takes the values in `measure` and uses them as column names.
+
+Complete this:
+
+1. START with scoring_long.
+2. THEN
+
+```{r}
+scoring_long |>
+  pivot_wider(id_cols = c(season, team),
+              names_from = measure,
+              values_from = points_per_game) -> scoring_wide
+
+scoring_wide
+```
+
+Compare `scoring_wide` with `scoring_summary`. We changed the layout and then changed it back. The averages should agree.
+
+## Join another summary
+
+Now create a separate table of wins and ties. We could calculate everything in one `summarise()` call, but keeping these tables separate gives us a chance to practice joining them.
+
+```{r}
+team_games |>
+  group_by(season, team) |>
+  summarise(games_played = n(),
+            wins = sum(won),
+            ties = sum(tied),
+            .groups = "drop") -> team_records
+
+team_records
+```
+
+What identifies the same observation in both tables? Here it is the combination of `season` and `team`. These columns are our join keys.
+
+### Check the keys first
+
+```{r}
+team_records |>
+  count(season, team) |>
+  filter(n > 1)
+
+scoring_wide |>
+  count(season, team) |>
+  filter(n > 1)
+```
+
+Both outputs should have zero rows. We want one row per team per season in each input.
+
+### Check for missing matches
+
+`anti_join()` shows rows in the first table that have no matching key in the second table.
+
+```{r}
+scoring_wide |>
+  anti_join(team_records, by = c("season", "team"))
+
+team_records |>
+  anti_join(scoring_wide, by = c("season", "team"))
+```
+
+Why do we check in both directions? What would you investigate if either output had rows?
+
+### Combine the tables
+
+1. START with scoring_wide.
+2. LEFT_JOIN team_records using season and team.
+3. STORE the result in team_comparison.
+
+```{r}
+scoring_wide |>
+  left_join(team_records, by = c("season", "team")) -> team_comparison
+
+tibble(before_join = nrow(scoring_wide),
+       after_join = nrow(team_comparison))
+
+team_comparison
+
+stopifnot(nrow(team_comparison) == nrow(scoring_wide),
+          !anyNA(team_comparison$games_played))
+```
+
+A `left_join()` keeps every row from the left table. If there is no matching key on the right, the added columns contain `NA`. If a key matches multiple rows on the right, a row on the left can produce multiple output rows.
+
+Click through the joined output. Find your team and confirm that its scoring measures and record appear on the same row.
+
+## Compare offense and defense
+
+More points scored is better for the offense. Fewer points allowed is better for the defense. Here, teams farther right and lower on the page have the more favorable combination.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+
+team_comparison |>
+  ggplot(aes(x = average_points_scored, y = average_points_allowed)) +
+  geom_abline(intercept = 0, slope = 1,
+              color = "grey65", linetype = "dashed") +
+  geom_point(aes(color = wins), size = 3) +
+  geom_text(aes(label = team), vjust = -0.7, size = 3,
+            show.legend = FALSE) +
+  scale_color_viridis_c() +
+  scale_x_continuous(expand = expansion(mult = 0.08)) +
+  scale_y_continuous(expand = expansion(mult = 0.08)) +
+  coord_equal() +
+  labs(title = "Compare NFL scoring and points allowed",
+       subtitle = "2025 regular season; each label represents one team",
+       x = "Average points scored per game (higher is better)",
+       y = "Average points allowed per game (lower is better)",
+       color = "Wins",
+       caption = "Data: nflverse/nfldata via nflreadr; 2025 regular season") +
+  theme_nfl_lab() -> comparison_plot
+
+comparison_plot
+```
+
+The dashed line marks equal average points scored and allowed. Below it, teams scored more than they allowed on average.
+
+- Find a team with strong scoring but relatively high points allowed.
+- Find two teams with similar scoring and different points allowed.
+- Does average scoring margin tell you everything shown in this figure?
+- These averages do not adjust for opponents or separate offense from defensive and special-teams scoring. What limits does that place on calling them measures of offensive and defensive strength?
+
+## Your turn
+
+Create your own offense-versus-defense figure. Choose at least two changes to try:
+
+- Make crowded labels easier to read, or label only selected teams.
+- Highlight one or more teams instead of mapping color to wins.
+- Change the title to describe a pattern you checked in the data.
+- Compare another design for showing where scoring equals points allowed.
+
+Keep all teams in the underlying comparison, and include the season, units, and data credit. Store your finished plot in `my_plot`, then display it.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+
+# Create my_plot here and display it.
+```
+
+## Optional: investigate a missing match
+
+This deliberately altered copy leaves one team out. The original table and input file stay unchanged.
+
+```{r}
+team_records |>
+  filter(team != "JAX") -> incomplete_records
+
+scoring_wide |>
+  anti_join(incomplete_records, by = c("season", "team"))
+
+scoring_wide |>
+  left_join(incomplete_records, by = c("season", "team")) |>
+  filter(is.na(games_played))
+```
+
+Why does the team remain after the left join? Why would replacing its missing wins with zero be misleading?
+
+## Optional: investigate a duplicate key
+
+```{r}
+team_records |>
+  slice_head(n = 1) -> extra_record
+
+team_records |>
+  bind_rows(extra_record) -> duplicate_records
+
+duplicate_records |>
+  count(season, team) |>
+  filter(n > 1)
+
+scoring_wide |>
+  left_join(duplicate_records, by = c("season", "team")) -> expanded_comparison
+
+tibble(before = nrow(scoring_wide), after = nrow(expanded_comparison))
+```
+
+Which team appears twice? Investigate the source of duplicate keys before removing rows. Two rows with the same team might represent different seasons or different kinds of records; dropping one without understanding it could lose information.
+
+## Save your figure
+
+After creating and displaying `my_plot`, enable this chunk by changing `eval: false` to `eval: true`.
+
+```{r}
+#| eval: false
+ggsave("week-04-my-plot.png", plot = my_plot,
+       width = 10, height = 8, units = "in", dpi = 300, bg = "white")
+```
+
+## Prepare for Friday
+
+- Show your figure and explain one visible comparison and one limitation.
+- Explain what one row represents before and after `pivot_longer()`.
+- Identify your join keys and explain why row counts matter.
+- Report the missing-score counts, exclusions, and unmatched-row checks.
+- Restart R and Render the worksheet from beginning to end.
+
+## Optional graduate GitHub route
+
+Inspect your personal repository's `.gitignore`. Check that `.Renviron`, `.Rhistory`, `.Rproj.user/`, and temporary rendering files are excluded. Use `git status --short` to review what Git would include. An ignore rule does not remove a file that is already tracked.
+
+Read `data/PROVENANCE.md` and explain how another student could identify the input and reproduce your transformations. Review intended changes before committing or pushing.
