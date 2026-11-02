@@ -1,0 +1,316 @@
+---
+title: "Week 5: Let team strength vary over time"
+format:
+  html:
+    toc: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+Last week we compared teams using summaries of the whole season.
+
+This week we'll look at how a team's strength changes over a season.
+
+## Load packages
+
+We need to load the tidyverse.
+Write the code for that.
+
+```{r}
+```
+
+Check 'helper-functions.R'
+Do you think you might use that function if you had to make a graph today?
+If so, write the code to load that file
+
+```{r}
+```
+
+
+## Import data
+
+We're going to load that same 'games_2025.csv' file located in the data folder.
+Write the code for that.
+
+```{r}
+```
+
+
+## Look at the data
+
+This is just for practice.
+You need repetition to get good at anything.
+
+Write the english descriptions of each code chunk.
+
+1. START with games.
+2. THEN
+
+```{r}
+games |>
+  filter(season == 2025) -> season_games
+```
+
+1. START with season_games.
+2. THEN
+```{r}
+season_games |>
+  filter(!is.na(home_score), !is.na(away_score)) -> completed_games
+```
+
+1. START with completed_games.
+2. THEN
+```{r}
+completed_games |>
+  select(game_id, season, week, team = home_team,
+         opponent = away_team,
+         points_scored = home_score, points_allowed = away_score) |>
+  mutate(venue = "Home") -> home_team_games
+```
+
+1. START with completed_games.
+2. THEN
+```{r}
+completed_games |>
+  select(game_id, season, week, team = away_team,
+         opponent = home_team,
+         points_scored = away_score, points_allowed = home_score) |>
+  mutate(venue = "Away") -> away_team_games
+```
+
+1. START with home_team_games.
+2. THEN
+```{r}
+home_team_games |>
+  bind_rows(away_team_games) |>
+  mutate(scoring_margin = points_scored - points_allowed) -> team_games
+```
+
+## Put the games in chronological order
+
+We are going to track how a team's strength changes over the course of a season.
+
+Therefore, we have to make sure that the games are sorted in chronological order.
+
+They might already be, but we need to make sure they are.
+
+1. START with team_games
+2. THEN ARRANGE (sort) by team and week
+3. STORE the result in 'ordered_games'
+```{r}
+team_games |>
+```
+
+
+## Try a small example first
+
+Go the the help panel on the right side of RStudio.
+
+Search for cummean()
+
+As you might guess, it calculates a cumulative mean.
+
+We want to see how scoring margin grows/shrinks over the course of a season so a cumulative mean is useful.
+
+Now go to the help panel and look up dplyr:lag.
+
+It's an easy way to see what the previous (last games's) value was in our model
+
+Let's try with the Jacksonville Jaguars first.
+Remember, we are using cummean not cumsum
+
+1. START with ordered_games
+2. THEN FILTER by team so that we only keep the JAX games
+3. THEN SELECT two variables: week and scoring_margin
+4. THEN MUTATE (create) two new variables:
+    * cum_scoring_margin with cummean(scoring_margin)
+    * lagged_scoring_margin with lag(cum_scoring_margin)
+```{r}
+ordered_games |>
+```
+
+## Now do that for every team
+
+1. START with ordered_games.
+2. THEN GROUP_BY team
+3. THEN MUTATE four variables
+    * a game number with game_number = row_number()
+    * the prior games number with prior games = game_number - 1L
+    * a cumulative mean on scoring_margin (cum_scoring_margin)
+    * a lagged mean on scoring_margin (lagged_scoring_margin)
+4. THEN UNGROUP
+5. STORE the result in team_history.
+
+```{r}
+ordered_games |>
+```
+
+Let's see what that did!
+```{r}
+team_history |>
+  select(team, week, game_number, prior_games, scoring_margin,
+         cum_scoring_margin, lagged_scoring_margin)
+```
+
+## Let's add the full season average
+
+1. START with team_history
+2. THEN GROUP BY team
+3. THEN MUTATE a new variable: full_season_average with mean()
+4. THEN UNGROUP
+5. STORE the result in leakage_comparison
+```{r}
+team_history |>
+```
+
+Calling the full season mean 'leakage' because data from the future (future games) is available in Week 1, Week 2, etc and we don't want to use data from the 'future' to when predicting 'todays' games.
+```{r}
+leakage_comparison |>
+  filter(team == "JAX") |>
+  select(team, week, scoring_margin, cum_scoring_margin,
+         lagged_scoring_margin, full_season_average)
+```
+
+- `lagged_scoring_margin` uses only this season's earlier games.
+- `cum_scoring_margin` also uses the result of the game on that row.
+- `full_season_average` uses every game in the supplied season, including later games where there are any.
+
+## Compare two teams over time
+
+Choose at least two valid team abbreviations.
+
+`%in%` checks whether a value matches any item in the vector.
+
+Continue the description:
+
+1. START with
+```{r}
+team_history |>
+  filter(team %in% c("JAX","IND")) |>
+  filter(prior_games >= 1)-> plot_history
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+plot_history |>
+  ggplot(aes(x = week, y = lagged_scoring_margin,
+             color = team, group = team)) +
+  geom_hline(yintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_line(linewidth = 0.9) +
+  geom_point(aes(shape = team), size = 2.4) +
+  scale_x_continuous(breaks = seq(1, 18, by = 2)) +
+  labs(title = "How did scoring margins change during the season?",
+       subtitle = "2025 regular season; each point uses only games before that week's game",
+       x = "Week of the upcoming game",
+       y = "Average margin in earlier games (points per game)",
+       color = "Team", shape = "Team",
+       caption = "Data: nflverse/nfldata via nflreadr; no estimate before a team's first game") +
+  theme_nfl_lab() -> history_plot
+
+history_plot
+```
+
+## Now let's do a rolling average
+
+We'll calculate 3-game rolling averages
+
+Complete this:
+
+1. START with team_history.
+2. THEN
+
+```{r}
+team_history |>
+  group_by(team) |>
+  arrange(week) |>
+  mutate(recent_three_before_game = (lag(scoring_margin, 1) + lag(scoring_margin, 2) + lag(scoring_margin, 3)) / 3) |>
+  ungroup() -> recent_history
+```
+
+Complete this:
+
+1. START with recent_history.
+2. THEN
+```{r}
+recent_history |>
+  filter(team == "JAX") |>
+  select(team, week, scoring_margin, prior_games,
+         lagged_scoring_margin, recent_three_before_game)
+```
+Dark times for jaguars fans weeks 6-10.
+
+## Review: reshape and facet
+
+Write the english description of this
+
+```{r}
+recent_history |>
+  filter(team %in% c("JAX", "PHI"), prior_games >= 3) |>
+  select(team, week, lagged_scoring_margin, recent_three_before_game) |>
+  pivot_longer(cols = c(lagged_scoring_margin, recent_three_before_game),
+               names_to = "history_used", values_to = "average_margin") |>
+  mutate(history_used = recode(history_used,
+                              lagged_scoring_margin = "All earlier games",
+                              recent_three_before_game = "Previous three games")) -> comparison_long
+
+comparison_long
+```
+
+Both lines below start when three earlier games exist so they can be compared over the same games.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 7
+
+comparison_long |>
+  ggplot(aes(x = week, y = average_margin,
+             color = history_used, linetype = history_used)) +
+  geom_hline(yintercept = 0, color = "grey65", linetype = "dashed") +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 1.8) +
+  facet_wrap(~team, ncol = 1) +
+  labs(title = "Recent performance and season-to-date performance",
+       subtitle = "2025 regular season; every average excludes the game on that row",
+       x = "Week of the upcoming game",
+       y = "Average margin in earlier games (points per game)",
+       color = NULL, linetype = NULL,
+       caption = "Data: nflverse/nfldata via nflreadr; three-game windows require three earlier results") +
+  theme_nfl_lab() -> comparison_plot
+
+comparison_plot
+```
+
+Can you find any places where the two types of lines tell a different story?
+
+## Your turn
+
+Create a line chart comparing at least two teams. Choose either pregame season-to-date averages or the comparison with recent games.
+
+- Choose teams you want to investigate
+- Use a title, units, and legend that explain what is plotted.
+- Identify a change and connect it to the results available at that time.
+- Can you change the 3 game window to 2? Or 5?
+
+Store your finished plot in `my_plot` and display it.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 7
+
+# Create my_plot here and display it.
+```
+
+## Save your figure
+
+After creating `my_plot`, enable this chunk by changing `eval: false` to `eval: true`.
+
+```{r}
+#| eval: false
+ggsave("week-05-my-plot.png", plot = my_plot,
+       width = 10, height = 7, units = "in", dpi = 300, bg = "white")
+```

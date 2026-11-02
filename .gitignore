@@ -62,3 +62,19 @@
 /Week 4/data/*
 !/Week 4/data/games_2025.csv
 !/Week 4/data/PROVENANCE.md
+
+# Week 5 student materials; keep rendered previews local.
+!/Week 5/
+/Week 5/*
+!/Week 5/README.md
+!/Week 5/Week_5_Worksheet.qmd
+!/Week 5/helper-functions.R
+!/Week 5/week-05-my-plot.png
+!/Week 5/data/
+/Week 5/data/*
+!/Week 5/data/games_2025.csv
+!/Week 5/data/PROVENANCE.md
+
+# Keep instructor answer sheets and solutions private.
+/Week 5/*[Aa]nswer*
+/Week 5/*[Ss]olution*
